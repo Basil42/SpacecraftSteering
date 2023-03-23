@@ -48,7 +48,12 @@ public class AttitudeControl : MonoBehaviour
             StopAllCoroutines();
             _transform.rotation = Random.rotation;
         }
-        GUILayout.Label("attitude" + _attitudeVis.ToString());
+
+        if (GUILayout.Button("random maneuver"))
+        {
+            StopAllCoroutines();
+            StartCoroutine(RollTo(Random.rotation));
+        }
         GUILayout.Label("Forward" + _transform.forward.ToString());
         GUILayout.Label("error:"+_errorVis.ToString());
         GUILayout.Label("PID:"+_pidVis.ToString());
@@ -68,7 +73,6 @@ public class AttitudeControl : MonoBehaviour
     [FormerlySerializedAs("PGain")] [SerializeField] private float pGain = 1.0f;
     [FormerlySerializedAs("DGain")] [SerializeField] private float dGain = 1.0f;
     //[FormerlySerializedAs("IGain")] [SerializeField] private float iGain = 0.0f;
-    private Vector3 _attitudeVis;
     private Vector3 _pidVis;
     private Vector3 _torqueVis;
     private Vector3 _errorVis;
@@ -91,12 +95,12 @@ public class AttitudeControl : MonoBehaviour
         WaitForFixedUpdate waiter = new WaitForFixedUpdate();
         {//initialization tick to prevent derivative kick(we avoid getting a huge initial rate of change of the error)
             var currentAttitude = _transform.rotation.eulerAngles;
-            _attitudeVis = currentAttitude;
             var targetAttitudeAngle = attitude.eulerAngles;
             var xError = (currentAttitude.x - targetAttitudeAngle.x + 540)% 360 - 180;
             var yError = (currentAttitude.y - targetAttitudeAngle.y + 540)% 360 - 180;
             var zError = (currentAttitude.z - targetAttitudeAngle.z + 540)% 360 - 180;
             error = new Vector3(xError, yError, zError);
+            Debug.Log("initial error: " + error.ToString());
             PIDValue = PIDTick(error,error);//D = 0, it won't always be correct, but it will rarely cause problem
             _pidVis = PIDValue;
             var torqueValue = Vector3.ClampMagnitude(PIDValue, attitudeAuthority);
@@ -108,7 +112,6 @@ public class AttitudeControl : MonoBehaviour
         do
         {
             var currentAttitude = _transform.rotation.eulerAngles;
-            _attitudeVis = currentAttitude;
             var targetAttitudeAngle = attitude.eulerAngles;
             var xError = (currentAttitude.x - targetAttitudeAngle.x + 540)% 360 - 180;
             var yError = (currentAttitude.y - targetAttitudeAngle.y + 540)% 360 - 180;
@@ -121,7 +124,8 @@ public class AttitudeControl : MonoBehaviour
             var torqueValue = Vector3.ClampMagnitude(PIDValue,attitudeAuthority);
             _torqueVis = torqueValue;
             
-            Debug.DrawRay(transform.position,torqueValue);
+            Debug.DrawRay(transform.position,torqueValue,Color.green);
+            Debug.DrawRay(transform.position,error,Color.red);
             _rb.AddRelativeTorque(torqueValue);
             yield return waiter;
         } while (error.magnitude > targetAttitudeTolerance || 
