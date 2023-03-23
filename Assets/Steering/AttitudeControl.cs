@@ -29,7 +29,7 @@ public class AttitudeControl : MonoBehaviour
         return neutralAttitude;
     }
 
-    
+    #if UNITY_EDITOR
     private void OnGUI()
     {
         if (GUILayout.Button("neutral roll test"))
@@ -42,6 +42,12 @@ public class AttitudeControl : MonoBehaviour
         {
             _transform.rotation = GetNeutralAttitude();
         }
+
+        if (GUILayout.Button("random attitude"))
+        {
+            StopAllCoroutines();
+            _transform.rotation = Random.rotation;
+        }
         GUILayout.Label("attitude" + _attitudeVis.ToString());
         GUILayout.Label("Forward" + _transform.forward.ToString());
         GUILayout.Label("error:"+_errorVis.ToString());
@@ -50,7 +56,7 @@ public class AttitudeControl : MonoBehaviour
         var position = _transform.position;
         Debug.DrawLine(position,position + _currentWorldDownDirection*10.0f);
     }
-
+#endif
     [SerializeField]private float targetAttitudeTolerance = 0.05f;
     private IEnumerator NeutralRoll()
     {
