@@ -641,7 +641,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7642937869429540587, guid: 392231059ad6c964b827029503b8fd69, type: 3}
       propertyPath: dGain
-      value: 8
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 7642937869429540587, guid: 392231059ad6c964b827029503b8fd69, type: 3}
       propertyPath: pGain
@@ -651,10 +651,6 @@ PrefabInstance:
       propertyPath: previs
       value: 
       objectReference: {fileID: 5760494840283588498}
-    - target: {fileID: 7642937869429540587, guid: 392231059ad6c964b827029503b8fd69, type: 3}
-      propertyPath: dynamicDGain
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7642937869429540587, guid: 392231059ad6c964b827029503b8fd69, type: 3}
       propertyPath: maxAngularSpeed
       value: 1
