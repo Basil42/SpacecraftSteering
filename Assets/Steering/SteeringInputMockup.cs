@@ -15,4 +15,9 @@ public class SteeringInputMockup : MonoBehaviour
             attitudeController?.RollToNeutral();
         }
     }
+
+    private void Start()
+    {
+        attitudeController?.RollToNeutral();
+    }
 }
