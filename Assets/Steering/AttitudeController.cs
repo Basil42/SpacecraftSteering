@@ -39,7 +39,6 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
         {
             return -_transform.up; //case where the object is oriented to be orthogonal to the horizon plane
         }
-        Debug.DrawRay(_transform.position,result,Color.red,5.0f);
         return result;
     }
 
