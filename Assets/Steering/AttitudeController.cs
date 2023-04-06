@@ -16,7 +16,7 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
     [SerializeField] private Vector3PidController angularSpeedDampingController;
     [SerializeField] private Vector3PidController headingController;
     [SerializeField] private float errorTolerance = 0.005f;
-    [SerializeField] private float targetAngularVelocityTolerance = 0.5f;
+    [SerializeField] private float targetAngularVelocityTolerance = 0.5f;//This could be replaced by a dynamic value equal to the maximum delta of angular velocity the object can produce in a physics tick
     private Transform _transform;
     private Rigidbody _rb;
     private void Awake()
@@ -26,15 +26,26 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
         _rb.maxAngularVelocity = maxAngularSpeed;
     }
 
-    private Vector3 GetLocalDownDirection()
+    private Vector3 GetCurrentDownDirection()
     {
         //TODO: find down direction that preserves heading
         return Vector3.down;//get the actual value from wherever
     }
 
+    private Vector3 GetCurrentHorizonAlignedDownDirection()
+    {
+        var result = Vector3.ProjectOnPlane(GetCurrentDownDirection(), _transform.forward);
+        if (result.magnitude < errorTolerance)
+        {
+            return -_transform.up; //case where the object is oriented to be orthogonal to the horizon plane
+        }
+        Debug.DrawRay(_transform.position,result,Color.red,5.0f);
+        return result;
+    }
+
     public void RollToNeutral()
     {
-        RollToDownDirection(GetLocalDownDirection());
+        RollToDownDirection(GetCurrentHorizonAlignedDownDirection());
     }
 
     public void RollToUpDirection(Vector3 up)
@@ -52,7 +63,6 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
     {
         rollController.ResetIntegral();
         angularSpeedDampingController.ResetIntegral();
-        
         Vector3 rollPidValue;
         Vector3 angularSpeedDampeningPidValue;
         Vector3 rollError;
@@ -64,12 +74,9 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
         {
             var currentDownDirection = -_transform.up;
             rollError = Vector3.Cross(currentDownDirection, down);
-            if (rollError.magnitude == 0.0f && Mathf.Abs(Vector3.Angle(currentDownDirection,down) - 180.0f) < (errorTolerance/Mathf.PI)*180.0f)//handling 180 edge case
+            if (rollError.magnitude < errorTolerance && Mathf.Abs(Vector3.Angle(currentDownDirection,down) - 180.0f) < errorTolerance)//handling 180 edge case
             {
-                rollError = currentDownDirection.z != 0.0f
-                    ? new Vector3(1.0f, 1.0f,
-                        -(currentDownDirection.x + currentDownDirection.y / currentDownDirection.z)) : 
-                    new Vector3(1.0f,-(currentDownDirection.x + currentDownDirection.z)/currentDownDirection.y,1.0f);
+                rollError = transform.forward;
             }
 
             errorAngle = Vector3.Angle(currentDownDirection, down);
@@ -80,7 +87,9 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IRollCon
             
             angularSpeedError = -_rb.angularVelocity;
             angularSpeedDampeningPidValue = angularSpeedDampingController.Tick(angularSpeedError, Time.fixedDeltaTime);
-            _rb.AddTorque(Vector3.ClampMagnitude(rollPidValue + angularSpeedDampeningPidValue, attitudeAuthority));
+            var torqueValue = Vector3.ClampMagnitude(rollPidValue + angularSpeedDampeningPidValue, attitudeAuthority);
+            torqueValue = _transform.InverseTransformDirection(torqueValue);
+            _rb.AddRelativeTorque(torqueValue);
             yield return waiter;
 
         } while (rollError.magnitude > errorTolerance ||
@@ -105,6 +114,7 @@ public interface IRollController
 {
     public void RollToUpDirection(Vector3 up);
     public void RollToDownDirection(Vector3 down);
+    
 }
 
 public interface INeutralRollController
