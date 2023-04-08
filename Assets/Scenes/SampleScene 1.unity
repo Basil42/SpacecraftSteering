@@ -132,9 +132,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 44657189}
-  - component: {fileID: 44657192}
   - component: {fileID: 44657190}
   - component: {fileID: 44657191}
+  - component: {fileID: 44657192}
   m_Layer: 0
   m_Name: Ship
   m_TagString: Untagged
@@ -149,7 +149,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 44657187}
-  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalRotation: {x: 0.4542358, y: 0.13455886, z: 0.54191315, w: 0.69418585}
   m_LocalPosition: {x: 1.04, y: 0.95, z: 2.03}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -159,7 +159,7 @@ Transform:
   - {fileID: 1975536039}
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+  m_LocalEulerAnglesHint: {x: 29, y: 50.94, z: 90}
 --- !u!54 &44657190
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -188,7 +188,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2332bed658d8a146b6afa97d244e1d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attitudeController: {fileID: 44657192}
 --- !u!114 &44657192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,23 +201,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attitudeAuthority: 150
-  maxAngularSpeed: 1.5707964
+  maxAngularSpeed: 7
   rollController:
-    pGain: 1
-    dGain: 8
+    pGain: 7
+    dGain: 300
     iGain: 0
     integralCap: 10
   angularSpeedDampingController:
-    pGain: 0.5
+    pGain: 0.1
     dGain: 0
     iGain: 0
     integralCap: 10
   headingController:
-    pGain: 0.7
-    dGain: 8
+    pGain: 1
+    dGain: 1
     iGain: 0
     integralCap: 10
-  errorTolerance: 0.005
+  errorTolerance: 0.05
   targetAngularVelocityTolerance: 0.05
 --- !u!1 &314768787
 GameObject:
