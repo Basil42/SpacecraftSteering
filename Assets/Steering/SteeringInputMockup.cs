@@ -13,6 +13,7 @@ public class SteeringInputMockup : MonoBehaviour
     private IHeadingController _headingController;
     private IAttitudeControl _attitudeController;
     private Rigidbody _rb;
+    [SerializeField] private float maxAngularVelocity = 7.0f;
 
     private void Awake()
     {
@@ -20,6 +21,7 @@ public class SteeringInputMockup : MonoBehaviour
         _headingController = GetComponent<IHeadingController>();
         _attitudeController = GetComponent<IAttitudeControl>();
         _rb = GetComponent<Rigidbody>();
+        _rb.maxAngularVelocity = maxAngularVelocity;
     }
 
     private void OnGUI()

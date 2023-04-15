@@ -32,7 +32,7 @@ public class ContinuousRollController : MonoBehaviour, INeutralRollController
         _torqueValue = Vector3.ClampMagnitude(pidValue, rollAuthority);
         _torqueValue = _transform.InverseTransformDirection(_torqueValue);//converted for animation purposes
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        if (Mathf.Abs(_torqueValue.x) > 0.0005f || Mathf.Abs(_torqueValue.y) > 0.0005f)//fairly confident that it can't happen
+        if (Mathf.Abs(_torqueValue.x) > errorTolerance || Mathf.Abs(_torqueValue.y) > errorTolerance)//fairly confident that it can't happen
         {
             Debug.LogWarning("Roll controller is generating pitch or yaw, it is ignored, but might be a sign that something is wrong with it.");
         }

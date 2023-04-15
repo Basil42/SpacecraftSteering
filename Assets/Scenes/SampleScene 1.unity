@@ -170,7 +170,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.5
+  m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -197,28 +197,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 44657187}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad0e128de57bf7b40a23e70d073c7f1f, type: 3}
+  m_Script: {fileID: 11500000, guid: 60e29cc76d466934e86f12530f355d55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attitudeAuthority: 150
+  rollAuthority: 150
   maxAngularSpeed: 7
-  rollController:
-    pGain: 7
-    dGain: 300
-    iGain: 0
-    integralCap: 10
-  angularSpeedDampingController:
-    pGain: 0.1
-    dGain: 0
-    iGain: 0
-    integralCap: 10
-  headingController:
-    pGain: 7
-    dGain: 300
+  rollPidController:
+    pGain: 5.5
+    dGain: 350
     iGain: 0
     integralCap: 10
   errorTolerance: 0.05
-  targetAngularVelocityTolerance: 0.05
 --- !u!1 &314768787
 GameObject:
   m_ObjectHideFlags: 0
