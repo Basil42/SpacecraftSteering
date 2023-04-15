@@ -1,9 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
-//TODO: take a target attitude using quaternion.lookatRotation, extract an up and forward vector from it and run a third PID controller for forward attitude, they could balance out correctly
 [RequireComponent(typeof(Rigidbody))]
-public class AttitudeController : MonoBehaviour, INeutralRollController,IHeadingController
+public class AttitudeManeuverController : MonoBehaviour, INeutralRollController,IHeadingController,IAttitudeControl
 {
     [Header("Ship properties")]//probably store these in a SO instead of serializing here
     [SerializeField]private float attitudeAuthority = 150.0f;
@@ -16,6 +15,7 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
     [SerializeField] private float targetAngularVelocityTolerance = 0.5f;//This could be replaced by a dynamic value equal to the maximum delta of angular velocity the object can produce in a physics tick
     private Transform _transform;
     private Rigidbody _rb;
+    private Vector3 _localDown;
 
     private void Awake()
     {
@@ -26,7 +26,6 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
 
     private Vector3 GetCurrentDownDirection()
     {
-        //TODO: find down direction that preserves heading
         return Vector3.down;//get the actual value from wherever
     }
 
@@ -45,6 +44,11 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
         RollToDownDirection(GetCurrentHorizonAlignedDownDirection());
     }
 
+    public void SetNeutralDirection(Vector3 direction)
+    {
+        GetCurrentDownDirection();
+    }
+
     public void RollToUpDirection(Vector3 up)
     {
         RollToDownDirection(-up);
@@ -53,8 +57,12 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
     private Coroutine _rollRoutine;
     public void RollToDownDirection(Vector3 down)
     {
-        StopAllCoroutines();
-        angularSpeedDampingController.ResetIntegral();//TODO move in OnEnable
+        if (_rollRoutine != null)
+        {
+            StopCoroutine(_rollRoutine);
+            _rollRoutine = null;
+        }
+        angularSpeedDampingController.ResetIntegral();
         _rollRoutine = StartCoroutine(RollToDownDirectionRoutine(down));
     }
 
@@ -94,13 +102,12 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
             var totalPidValue = rollPidValue + angularSpeedDampeningPidValue;
             var torqueValue = Vector3.ClampMagnitude(rollPidValue + angularSpeedDampeningPidValue, attitudeAuthority);
             torqueValue = _transform.InverseTransformDirection(torqueValue);
-            _rb.AddRelativeTorque(torqueValue);
+            _rb.AddRelativeTorque(new Vector3(0.0f,0.0f,torqueValue.z));
             yield return waiter;
 
         } while (rollError.magnitude > errorTolerance ||
                  _rb.angularVelocity.magnitude > targetAngularVelocityTolerance);
-        Debug.Log("Maneuver complete");
-        _rb.angularVelocity = Vector3.zero;//TODO: move in Ondisable
+        _rb.angularVelocity = Vector3.zero;
     }
 
     public void TurnToward(Vector3 worldPosition)
@@ -152,9 +159,18 @@ public class AttitudeController : MonoBehaviour, INeutralRollController,IHeading
                  _rb.angularVelocity.magnitude > targetAngularVelocityTolerance);
 
         _headingCoroutine = null;
-        Debug.Log("heading maneuver completed");
     }
-    
+
+    public void SetDesiredAttitudeTo(Quaternion attitude)
+    {
+        SetDesiredAttitudeTo(attitude * Vector3.forward, attitude * Vector3.up);
+    }
+
+    public void SetDesiredAttitudeTo(Vector3 forward, Vector3 up)
+    {
+        RollToUpDirection(up);
+        ChangeHeadingTo(forward);
+    }
 }
 
 public interface IRollController
@@ -169,10 +185,17 @@ public interface IRollController
 public interface INeutralRollController : IRollController
 {
     public void RollToNeutral();
+    public void SetNeutralDirection(Vector3 direction);
 }
 
 public interface IHeadingController
 {
     public void TurnToward(Vector3 worldPosition);
     public void ChangeHeadingTo(Vector3 direction);
+}
+
+public interface IAttitudeControl
+{
+    public void SetDesiredAttitudeTo(Quaternion attitude);
+    public void SetDesiredAttitudeTo(Vector3 forward, Vector3 up);
 }

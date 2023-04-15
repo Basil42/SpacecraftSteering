@@ -213,8 +213,8 @@ MonoBehaviour:
     iGain: 0
     integralCap: 10
   headingController:
-    pGain: 1
-    dGain: 1
+    pGain: 7
+    dGain: 300
     iGain: 0
     integralCap: 10
   errorTolerance: 0.05

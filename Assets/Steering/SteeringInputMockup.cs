@@ -11,12 +11,14 @@ public class SteeringInputMockup : MonoBehaviour
 {
     private INeutralRollController _rollController;
     private IHeadingController _headingController;
+    private IAttitudeControl _attitudeController;
     private Rigidbody _rb;
 
     private void Awake()
     {
         _rollController = GetComponent<INeutralRollController>();
         _headingController = GetComponent<IHeadingController>();
+        _attitudeController = GetComponent<IAttitudeControl>();
         _rb = GetComponent<Rigidbody>();
     }
 
@@ -36,6 +38,11 @@ public class SteeringInputMockup : MonoBehaviour
         if (GUILayout.Button("Heading test"))
         {
             _headingController?.ChangeHeadingTo(Vector3.right);
+        }
+
+        if (GUILayout.Button("Random attitude maneuver"))
+        {
+            _attitudeController?.SetDesiredAttitudeTo(Random.rotation);
         }
         GUILayout.Label(_rb.angularVelocity.magnitude.ToString(CultureInfo.InvariantCulture));
         
